@@ -144,6 +144,23 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Livraisons par Client" android:textColor="@color/text_primary" android:textStyle="bold" />
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/bar_chart_client"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/distribution_flow" android:textColor="@color/text_primary" android:textStyle="bold" />
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pie_chart"
@@ -178,6 +195,19 @@
                 android:text="@string/live_map_btn"
                 android:textColor="@color/colorPrimary"
                 app:icon="@drawable/ic_map"
+                app:iconPadding="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/card_messages"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:gravity="start|center_vertical"
+                android:padding="16dp"
+                android:text="Messages &amp; Urgences"
+                android:textColor="@color/colorPrimary"
+                app:icon="@drawable/ic_messages"
                 app:iconPadding="16dp" />
 
             <View

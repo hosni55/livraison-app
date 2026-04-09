@@ -46,9 +46,9 @@ public class ControleurMainActivity extends BaseActivity {
 
     private SessionManager sessionManager;
     private TextView tvTotal, tvLivrees, tvEnCours, tvEchecs, tvUserName;
-    private BarChart barChart, barChartLivreur;
+    private BarChart barChart, barChartLivreur, barChartClient;
     private PieChart pieChart;
-    private View cardLivraisons, cardMap;
+    private View cardLivraisons, cardMap, cardMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +64,11 @@ public class ControleurMainActivity extends BaseActivity {
         tvEchecs = findViewById(R.id.tv_echecs);
         barChart = findViewById(R.id.bar_chart);
         barChartLivreur = findViewById(R.id.bar_chart_livreur);
+        barChartClient = findViewById(R.id.bar_chart_client);
         pieChart = findViewById(R.id.pie_chart);
         cardLivraisons = findViewById(R.id.card_livraisons_list);
+        cardMap = findViewById(R.id.card_map);
+        cardMessages = findViewById(R.id.card_messages);
         
         findViewById(R.id.fab_add_livraison).setOnClickListener(v -> {
             startActivity(new Intent(this, AddLivraisonActivity.class));
@@ -85,12 +88,69 @@ public class ControleurMainActivity extends BaseActivity {
             startActivity(new Intent(this, LivraisonsListActivity.class));
         });
 
-        findViewById(R.id.card_map).setOnClickListener(v -> {
+        cardMap.setOnClickListener(v -> {
             startActivity(new Intent(this, LiveMapActivity.class));
+        });
+
+        cardMessages.setOnClickListener(v -> {
+            startActivity(new Intent(this, MessagesActivity.class)); // For now, reuse it and make it smart
         });
 
         loadDashboardStats();
         loadLivreurStats();
+        loadClientStats();
+    }
+
+    private void loadClientStats() {
+        RetrofitClient.getInstance(this).getApiService().getDashboardByClient().enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        setupClientBarChart(response.body());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+        });
+    }
+
+    private void setupClientBarChart(List<Map<String, Object>> stats) {
+        if (stats == null || stats.isEmpty()) return;
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+
+        for (int i = 0; i < stats.size() && i < 5; i++) {
+            Map<String, Object> s = stats.get(i);
+            Object countObj = null;
+            String name = "";
+            for (String key : s.keySet()) {
+                if (key.equalsIgnoreCase("COUNT")) countObj = s.get(key);
+                if (key.equalsIgnoreCase("NOMCLT")) name = (String) s.get(key);
+            }
+            float countVal = (countObj instanceof Number) ? ((Number) countObj).floatValue() : 0f;
+            entries.add(new BarEntry(i, countVal));
+            labels.add(name != null ? name : "N/A");
+        }
+        if (entries.isEmpty()) return;
+
+        BarDataSet dataSet = new BarDataSet(entries, "Top Clients");
+        dataSet.setColors(ColorTemplate.PASTEL_COLORS);
+        BarData barData = new BarData(dataSet);
+        barChartClient.setData(barData);
+        barChartClient.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                int idx = (int) value;
+                return (idx >= 0 && idx < labels.size()) ? labels.get(idx) : "";
+            }
+        });
+        barChartClient.invalidate();
     }
 
     private void loadLivreurStats() {

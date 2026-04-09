@@ -37,13 +37,7 @@ public class MessagesActivity extends AppCompatActivity {
     private LinearLayout layoutQuickMessages;
 
     // Quick message templates
-    private final String[] QUICK_MESSAGES = {
-        "Client ne répond pas au téléphone",
-        "Le client n'accepte pas la commande",
-        "Client absent — je réessaie plus tard",
-        "Adresse introuvable",
-        "Besoin d'aide urgente"
-    };
+    private String[] QUICK_MESSAGES;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +45,25 @@ public class MessagesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_messages);
 
         sessionManager = new SessionManager(this);
+        
+        // Define messages based on role
+        if ("CONTROLEUR".equalsIgnoreCase(sessionManager.getRole())) {
+            QUICK_MESSAGES = new String[]{
+                "Attention: Nouvelle livraison pour vous",
+                "Merci de valider votre statut",
+                "Information: Trafic dense sur votre zone",
+                "Appel urgent: Contactez le superviseur"
+            };
+        } else {
+            QUICK_MESSAGES = new String[]{
+                "Client absent — je réessaie plus tard",
+                "Client ne répond pas au téléphone",
+                "Le client n'accepte pas la commande",
+                "Adresse introuvable",
+                "Besoin d'aide urgente"
+            };
+        }
+
         scrollMessages = findViewById(R.id.scroll_messages);
         layoutMessages = findViewById(R.id.layout_messages);
         etMessage = findViewById(R.id.et_message);
@@ -132,7 +145,14 @@ public class MessagesActivity extends AppCompatActivity {
 
         // Build WebSocket message payload
         Map<String, Object> payload = new HashMap<>();
-        payload.put("receiverId", 6L); // Default to controleur ID 6
+        
+        // Controller speaks to drivers (Broadcast or last sender), Drivers speak to controller
+        if ("CONTROLEUR".equalsIgnoreCase(sessionManager.getRole())) {
+            payload.put("receiverId", 0L); // 0L represents broadcast to all drivers
+        } else {
+            payload.put("receiverId", 6L); // Specific controller ID
+        }
+        
         payload.put("content", message);
 
         Gson gson = new Gson();
