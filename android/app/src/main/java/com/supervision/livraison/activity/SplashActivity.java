@@ -4,33 +4,44 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import com.supervision.livraison.R;
 
-public class SplashActivity extends BaseActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.supervision.livraison.R;
+import com.supervision.livraison.activity.controleur.ControleurMainActivity;
+import com.supervision.livraison.activity.livreur.LivreurMainActivity;
+import com.supervision.livraison.util.SessionManager;
+
+/**
+ * SplashActivity — initial screen with persistent login check.
+ */
+public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        ImageView ivLogo = findViewById(R.id.ivLogo);
-        TextView tvAppName = findViewById(R.id.tvAppName);
-
-        // Simple entrance animation
-        Animation fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        fadeIn.setDuration(1500);
-        ivLogo.startAnimation(fadeIn);
-        tvAppName.startAnimation(fadeIn);
-
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
-            finish();
-        }, 2500);
+            SessionManager sessionManager = new SessionManager(this);
+            
+            if (sessionManager.isLoggedIn()) {
+                redirectToDashboard(sessionManager.getRole());
+            } else {
+                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+                finish();
+            }
+        }, 2000); // 2 second delay for branding
+    }
+
+    private void redirectToDashboard(String role) {
+        Intent intent;
+        if ("CONTROLEUR".equalsIgnoreCase(role)) {
+            intent = new Intent(this, ControleurMainActivity.class);
+        } else {
+            intent = new Intent(this, LivreurMainActivity.class);
+        }
+        startActivity(intent);
+        finish();
     }
 }

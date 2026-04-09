@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.supervision.livraison.activity.BaseActivity;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -40,7 +40,8 @@ import retrofit2.Response;
 
 /**
  * ControleurMainActivity — Dashboard for controleur role.
- * Shows stats cards, bar chart (livraisons/livreur), pie chart (by status).
+ * Shows stats cards, multiple charts (livraisons/livreur, per client, status).
+ * Now featuring Bottom Navigation.
  */
 public class ControleurMainActivity extends BaseActivity {
 
@@ -48,7 +49,8 @@ public class ControleurMainActivity extends BaseActivity {
     private TextView tvTotal, tvLivrees, tvEnCours, tvEchecs, tvUserName;
     private BarChart barChart, barChartLivreur, barChartClient;
     private PieChart pieChart;
-    private View cardLivraisons, cardMap, cardMessages;
+    private View dashboardLayout, profileLayout;
+    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,40 +67,53 @@ public class ControleurMainActivity extends BaseActivity {
         barChart = findViewById(R.id.bar_chart);
         barChartLivreur = findViewById(R.id.bar_chart_livreur);
         barChartClient = findViewById(R.id.bar_chart_client);
-        pieChart = findViewById(R.id.pie_chart);
-        cardLivraisons = findViewById(R.id.card_livraisons_list);
-        cardMap = findViewById(R.id.card_map);
-        cardMessages = findViewById(R.id.card_messages);
+        // pieChart = findViewById(R.id.pie_chart); // Moved to separate tab if needed or keep hidden
         
-        findViewById(R.id.fab_add_livraison).setOnClickListener(v -> {
-            startActivity(new Intent(this, AddLivraisonActivity.class));
-        });
+        dashboardLayout = findViewById(R.id.dashboard_layout);
+        profileLayout = findViewById(R.id.profile_layout);
+        bottomNav = findViewById(R.id.bottom_navigation);
         
-        // Setup Toolbar Logout
-        findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            sessionManager.logout();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) showDashboard();
+            else if (id == R.id.nav_profile) showProfile();
+            else if (id == R.id.nav_ai) startActivity(new Intent(this, com.supervision.livraison.activity.AiAssistantActivity.class));
+            return true;
         });
+
+        findViewById(R.id.btn_settings).setOnClickListener(v -> {
+            startActivity(new Intent(this, com.supervision.livraison.activity.SettingsActivity.class));
+        });
+
+        findViewById(R.id.btn_logout).setOnClickListener(v -> logout());
 
         tvUserName.setText(getString(R.string.hello, sessionManager.getUserName()));
-
-        // Navigation cards
-        cardLivraisons.setOnClickListener(v -> {
-            startActivity(new Intent(this, LivraisonsListActivity.class));
-        });
-
-        cardMap.setOnClickListener(v -> {
-            startActivity(new Intent(this, LiveMapActivity.class));
-        });
-
-        cardMessages.setOnClickListener(v -> {
-            startActivity(new Intent(this, MessagesActivity.class)); // For now, reuse it and make it smart
-        });
 
         loadDashboardStats();
         loadLivreurStats();
         loadClientStats();
+        
+        findViewById(R.id.fab_add_livraison).setOnClickListener(v -> {
+            startActivity(new Intent(this, AddLivraisonActivity.class));
+        });
+    }
+
+    private void showDashboard() {
+        dashboardLayout.setVisibility(View.VISIBLE);
+        profileLayout.setVisibility(View.GONE);
+    }
+
+    private void showProfile() {
+        dashboardLayout.setVisibility(View.GONE);
+        profileLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void logout() {
+        sessionManager.logout();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void loadClientStats() {
@@ -109,19 +124,16 @@ public class ControleurMainActivity extends BaseActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         setupClientBarChart(response.body());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    } catch (Exception e) { e.printStackTrace(); }
                 }
             }
-
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
     }
 
     private void setupClientBarChart(List<Map<String, Object>> stats) {
-        if (stats == null || stats.isEmpty()) return;
+        if (stats == null || stats.isEmpty() || barChartClient == null) return;
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
 
@@ -141,8 +153,7 @@ public class ControleurMainActivity extends BaseActivity {
 
         BarDataSet dataSet = new BarDataSet(entries, "Top Clients");
         dataSet.setColors(ColorTemplate.PASTEL_COLORS);
-        BarData barData = new BarData(dataSet);
-        barChartClient.setData(barData);
+        barChartClient.setData(new BarData(dataSet));
         barChartClient.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -167,7 +178,6 @@ public class ControleurMainActivity extends BaseActivity {
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
@@ -175,36 +185,24 @@ public class ControleurMainActivity extends BaseActivity {
 
     private void setupLivreurBarChart(List<Map<String, Object>> stats) {
         if (stats == null || stats.isEmpty()) return;
-        
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
-
         for (int i = 0; i < stats.size() && i < 5; i++) {
             Map<String, Object> s = stats.get(i);
             Object countObj = null;
             String name = "";
-            
-            // Handle cross-platform key differences (case-sensitivity)
             for (String key : s.keySet()) {
                 if (key.equalsIgnoreCase("COUNT")) countObj = s.get(key);
                 if (key.equalsIgnoreCase("NOMPERS")) name = (String) s.get(key);
             }
-            
-            float countVal = 0f;
-            if (countObj instanceof Number) {
-                countVal = ((Number) countObj).floatValue();
-            }
+            float countVal = (countObj instanceof Number) ? ((Number) countObj).floatValue() : 0f;
             entries.add(new BarEntry(i, countVal));
             labels.add(name != null ? name : "N/A");
         }
-        
         if (entries.isEmpty()) return;
-
         BarDataSet dataSet = new BarDataSet(entries, "Top Livreurs");
         dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-        BarData barData = new BarData(dataSet);
-        
-        barChartLivreur.setData(barData);
+        barChartLivreur.setData(new BarData(dataSet));
         barChartLivreur.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -216,29 +214,17 @@ public class ControleurMainActivity extends BaseActivity {
     }
 
     private void loadDashboardStats() {
-        if (!NetworkUtils.isOnline(this)) {
-            Toast.makeText(this, "Pas de connexion internet", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        if (!NetworkUtils.isOnline(this)) return;
         RetrofitClient.getInstance(this).getApiService().getDashboardStats().enqueue(new Callback<DashboardStats>() {
             @Override
             public void onResponse(Call<DashboardStats> call, Response<DashboardStats> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        updateUI(response.body());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(ControleurMainActivity.this, "UI Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+                    try { updateUI(response.body()); } catch (Exception e) { e.printStackTrace(); }
                 }
             }
-
             @Override
-            public void onFailure(Call<DashboardStats> call, Throwable t) {
-                Toast.makeText(ControleurMainActivity.this, "Erreur: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<DashboardStats> call, Throwable t) {}
         });
     }
 
@@ -247,9 +233,7 @@ public class ControleurMainActivity extends BaseActivity {
         tvLivrees.setText(String.valueOf(stats.getLivrees() != null ? stats.getLivrees() : 0));
         tvEnCours.setText(String.valueOf(stats.getEnCours() != null ? stats.getEnCours() : 0));
         tvEchecs.setText(String.valueOf(stats.getEchecs() != null ? stats.getEchecs() : 0));
-
         setupBarChart(stats);
-        setupPieChart(stats);
     }
 
     private void setupBarChart(DashboardStats stats) {
@@ -258,49 +242,19 @@ public class ControleurMainActivity extends BaseActivity {
         entries.add(new BarEntry(1, stats.getEnCours() != null ? stats.getEnCours().floatValue() : 0f));
         entries.add(new BarEntry(2, stats.getPlanifiees() != null ? stats.getPlanifiees().floatValue() : 0f));
         entries.add(new BarEntry(3, stats.getEchecs() != null ? stats.getEchecs().floatValue() : 0f));
-        entries.add(new BarEntry(4, stats.getRetardees() != null ? stats.getRetardees().floatValue() : 0f));
 
         if (entries.isEmpty()) return;
-        
         BarDataSet dataSet = new BarDataSet(entries, "Livraisons");
-        dataSet.setColors(com.github.mikephil.charting.utils.ColorTemplate.MATERIAL_COLORS);
-        dataSet.setValueTextSize(12f);
-
-        BarData barData = new BarData(dataSet);
-        barChart.setData(barData);
-        barChart.getDescription().setEnabled(false);
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        barChart.setData(new BarData(dataSet));
         barChart.getXAxis().setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                String[] labels = {"Livrées", "En cours", "Planifiées", "Échecs", "Retardées"};
-                if (value >= 0 && value < labels.length) {
-                    return labels[(int) value];
-                }
-                return "";
+                String[] labels = {"Livrées", "En cours", "Planifiées", "Échecs"};
+                int idx = (int) value;
+                return (idx >= 0 && idx < labels.length) ? labels[idx] : "";
             }
         });
         barChart.invalidate();
-    }
-
-    private void setupPieChart(DashboardStats stats) {
-        List<PieEntry> entries = new ArrayList<>();
-        if (stats.getLivrees() != null && stats.getLivrees() > 0) entries.add(new PieEntry(stats.getLivrees(), "Livrées"));
-        if (stats.getEnCours() != null && stats.getEnCours() > 0) entries.add(new PieEntry(stats.getEnCours(), "En cours"));
-        if (stats.getPlanifiees() != null && stats.getPlanifiees() > 0) entries.add(new PieEntry(stats.getPlanifiees(), "Planifiées"));
-        if (stats.getEchecs() != null && stats.getEchecs() > 0) entries.add(new PieEntry(stats.getEchecs(), "Échecs"));
-        if (stats.getRetardees() != null && stats.getRetardees() > 0) entries.add(new PieEntry(stats.getRetardees(), "Retardées"));
-
-        if (entries.isEmpty()) return;
-
-        PieDataSet dataSet = new PieDataSet(entries, "Statut");
-        dataSet.setColors(com.github.mikephil.charting.utils.ColorTemplate.JOYFUL_COLORS);
-        dataSet.setValueTextSize(14f);
-
-        PieData pieData = new PieData(dataSet);
-        pieChart.setData(pieData);
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setCenterText("Livraisons");
-        pieChart.setCenterTextSize(16f);
-        pieChart.invalidate();
     }
 }

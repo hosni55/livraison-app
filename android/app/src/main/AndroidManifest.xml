@@ -49,6 +49,7 @@
         <activity android:name=".activity.livreur.CameraProofActivity" />
         <activity android:name=".activity.livreur.MessagesActivity" />
         <activity android:name=".activity.livreur.LiveMapActivity" />
+        <activity android:name=".activity.AiAssistantActivity" />
 
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".activity.ProfileActivity" />

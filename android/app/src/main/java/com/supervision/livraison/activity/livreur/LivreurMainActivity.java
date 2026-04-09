@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.supervision.livraison.activity.BaseActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.supervision.livraison.activity.controleur.LivraisonsListActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -38,11 +39,12 @@ import retrofit2.Response;
 public class LivreurMainActivity extends BaseActivity {
 
     private SessionManager sessionManager;
-    private RecyclerView recyclerView;
-    private LivraisonAdapter adapter;
+    private BottomNavigationView bottomNav;
+    private View dashboardLayout, profileLayout, journalLayout;
+    private TextView tvWelcomeName, tvCountPending, tvCountDelivered, tvProfileName;
+    private RecyclerView rvHistory;
     private ProgressBar progressBar;
-    private SwipeRefreshLayout swipeRefresh;
-    private TextView tvEmpty, tvUserName;
+    private LivraisonAdapter adapter;
 
     private List<Livraison> livraisons = new ArrayList<>();
     private final Handler gpsHandler = new Handler();
@@ -60,39 +62,86 @@ public class LivreurMainActivity extends BaseActivity {
         setContentView(R.layout.activity_livreur_main);
 
         sessionManager = new SessionManager(this);
-        tvUserName = findViewById(R.id.tv_user_name);
-        recyclerView = findViewById(R.id.recycler_view);
+        
+        // Find Views
+        dashboardLayout = findViewById(R.id.dashboard_layout);
+        profileLayout = findViewById(R.id.profile_layout);
+        journalLayout = findViewById(R.id.journal_layout);
+        bottomNav = findViewById(R.id.bottom_navigation);
         progressBar = findViewById(R.id.progress_bar);
-        swipeRefresh = findViewById(R.id.swipe_refresh);
-        tvEmpty = findViewById(R.id.tv_empty);
+        
+        tvWelcomeName = findViewById(R.id.tv_welcome_name);
+        tvCountPending = findViewById(R.id.tv_count_pending);
+        tvCountDelivered = findViewById(R.id.tv_count_delivered);
+        tvProfileName = findViewById(R.id.tv_profile_name);
+        
+        rvHistory = findViewById(R.id.rv_history);
+        rvHistory.setLayoutManager(new LinearLayoutManager(this));
+        
+        // Setup UI
+        tvWelcomeName.setText("Bonjour, " + sessionManager.getUserName());
+        tvProfileName.setText(sessionManager.getUserName());
 
-        tvUserName.setText(getString(R.string.hello, sessionManager.getUserName()));
+        // Navigation
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) showDashboard();
+            else if (id == R.id.nav_journal) showJournal();
+            else if (id == R.id.nav_ai) showAiAssistant();
+            else if (id == R.id.nav_profile) showProfile();
+            return true;
+        });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new LivraisonAdapter(livraisons);
-        recyclerView.setAdapter(adapter);
-
-        swipeRefresh.setOnRefreshListener(this::loadTodayDeliveries);
-
-        // Header Actions
+        // Dashboard Clicks
+        findViewById(R.id.btn_map).setOnClickListener(v -> startActivity(new Intent(this, LiveMapActivity.class)));
+        findViewById(R.id.btn_messages).setOnClickListener(v -> startActivity(new Intent(this, MessagesActivity.class)));
+        findViewById(R.id.card_ai_hint).setOnClickListener(v -> bottomNav.setSelectedItemId(R.id.nav_ai));
+        
+        // Settings & Logout
+        findViewById(R.id.btn_settings).setOnClickListener(v -> startActivity(new Intent(this, com.supervision.livraison.activity.SettingsActivity.class)));
         findViewById(R.id.btn_logout).setOnClickListener(v -> logout());
-        findViewById(R.id.btn_settings).setOnClickListener(v -> {
-            startActivity(new Intent(this, com.supervision.livraison.activity.SettingsActivity.class));
-        });
-        findViewById(R.id.btn_profile).setOnClickListener(v -> {
-            startActivity(new Intent(this, com.supervision.livraison.activity.ProfileActivity.class));
-        });
-
-        // Dashboard Actions
-        findViewById(R.id.card_map).setOnClickListener(v -> {
-            startActivity(new Intent(this, LiveMapActivity.class));
-        });
-        findViewById(R.id.btn_view_all).setOnClickListener(v -> {
-            startActivity(new Intent(this, LivraisonsListActivity.class));
-        });
 
         loadTodayDeliveries();
         gpsHandler.post(gpsRunnable);
+    }
+
+    private void showDashboard() {
+        dashboardLayout.setVisibility(View.VISIBLE);
+        profileLayout.setVisibility(View.GONE);
+        journalLayout.setVisibility(View.GONE);
+    }
+
+    private void showJournal() {
+        dashboardLayout.setVisibility(View.GONE);
+        profileLayout.setVisibility(View.GONE);
+        journalLayout.setVisibility(View.VISIBLE);
+        loadHistory();
+    }
+
+    private void showProfile() {
+        dashboardLayout.setVisibility(View.GONE);
+        profileLayout.setVisibility(View.VISIBLE);
+        journalLayout.setVisibility(View.GONE);
+    }
+
+    private void showAiAssistant() {
+        startActivity(new Intent(this, com.supervision.livraison.activity.AiAssistantActivity.class));
+    }
+
+    private void loadHistory() {
+        // Reuse delivery list logic for journal
+        RetrofitClient.getInstance(this).getApiService().getTodayDeliveries().enqueue(new Callback<List<Livraison>>() {
+            @Override
+            public void onResponse(Call<List<Livraison>> call, Response<List<Livraison>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    livraisons = response.body();
+                    adapter = new LivraisonAdapter(livraisons);
+                    rvHistory.setAdapter(adapter);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Livraison>> call, Throwable t) {}
+        });
     }
 
     private void logout() {
@@ -106,35 +155,40 @@ public class LivreurMainActivity extends BaseActivity {
     private void loadTodayDeliveries() {
         if (!NetworkUtils.isOnline(this)) {
             Toast.makeText(this, "Pas de connexion internet", Toast.LENGTH_SHORT).show();
-            swipeRefresh.setRefreshing(false);
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
 
         RetrofitClient.getInstance(this).getApiService().getTodayDeliveries().enqueue(new Callback<List<Livraison>>() {
             @Override
             public void onResponse(Call<List<Livraison>> call, Response<List<Livraison>> response) {
-                progressBar.setVisibility(View.GONE);
-                swipeRefresh.setRefreshing(false);
-
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     livraisons = response.body();
+                    
+                    // Update Counters
+                    long pending = 0;
+                    long delivered = 0;
+                    for (Livraison l : livraisons) {
+                        if ("LIVREE".equalsIgnoreCase(l.getEtatliv())) delivered++;
+                        else pending++;
+                    }
+                    tvCountPending.setText(String.valueOf(pending));
+                    tvCountDelivered.setText(String.valueOf(delivered));
+
                     // Sort by delivery time
                     Collections.sort(livraisons, (a, b) -> {
                         if (a.getDateliv() == null) return 1;
                         if (b.getDateliv() == null) return -1;
                         return a.getDateliv().compareTo(b.getDateliv());
                     });
-                    adapter.notifyDataSetChanged();
-                    tvEmpty.setVisibility(livraisons.isEmpty() ? View.VISIBLE : View.GONE);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Livraison>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                swipeRefresh.setRefreshing(false);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
                 Toast.makeText(LivreurMainActivity.this, "Erreur: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
