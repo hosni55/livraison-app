@@ -1,9 +1,12 @@
 # Android
 android/.gradle/
 android/app/build/
+android/app/build_old*/
 android/local.properties
 android/*.iml
 android/.idea/
+.idea/
+*.iml
 
 # Backend
 backend/target/
