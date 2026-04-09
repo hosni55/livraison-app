@@ -1,0 +1,20 @@
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.idea/
+
+# Backend
+backend/target/
+backend/.project
+backend/.classpath
+backend/.settings/
+backend/*.iml
+backend/.idea/
+
+# General
+.DS_Store
+*.log
+tmp/
+.gemini/

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Mode Palette (ENICarthage Inspired) -->
+    <color name="colorPrimary">#1A3361</color>
+    <color name="colorPrimaryDark">#0A1628</color>
+    <color name="colorAccent">#E8AF30</color>
+
+    <!-- Base Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#0A1628</color>
+    <color name="background">#0A1628</color>
+    <color name="surface">#0F2043</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#E9ECEF</color>
+    <color name="text_secondary">#ADB5BD</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    
+    <!-- Status Colors -->
+    <color name="status_success">#2DCE89</color>
+    <color name="status_error">#F5365C</color>
+    <color name="status_warning">#FB6340</color>
+    <color name="status_info">#11CDEF</color>
+
+    <!-- Decorative -->
+    <color name="gold_gradient_start">#FFD700</color>
+    <color name="gold_gradient_end">#E8AF30</color>
+    <color name="navy_light">#1A3361</color>
+
+    <!-- Compatibility Aliases -->
+    <color name="primary">@color/colorPrimary</color>
+    <color name="primary_dark">@color/colorPrimaryDark</color>
+    <color name="accent">@color/colorAccent</color>
+    <color name="background_color">@color/background</color>
+    <color name="text_hint">@color/text_secondary</color>
+    <color name="gray">#999999</color>
+
+
+
+</resources>

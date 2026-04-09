@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">LivraisonCom</string>
+    
+    <!-- Auth -->
+    <string name="login_title">تسجيل الدخول</string>
+    <string name="register_title">إنشاء حساب</string>
+    <string name="login_prompt">يرجى تسجيل الدخول للمتابعة</string>
+    <string name="register_prompt">انضم إلى شبكة التوصيل لدينا</string>
+    <string name="first_name">الاسم الأول</string>
+    <string name="last_name">اللقب</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="id_placeholder">المعرف</string>
+    <string name="password">كلمة المرور</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="role_selection">اختر دورك</string>
+    <string name="role_livreur">سائق</string>
+    <string name="role_controleur">مشرف</string>
+    <string name="btn_login">دخول</string>
+    <string name="btn_register">تسجيل</string>
+    
+    <!-- UI Common -->
+    <string name="settings">الإعدادات</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="hello">مرحباً، %s</string>
+    <string name="supervision">إشراف</string>
+    <string name="total">المجموع</string>
+    <string name="analytics">تحليلات</string>
+    <string name="performance_driver">أداء السائقين</string>
+    <string name="distribution_flow">توزيع الطلبات</string>
+    <string name="delivery_list_btn">قائمة الطلبات</string>
+    <string name="live_map_btn">خريطة تتبع السائقين</string>
+    <string name="in_progress">قيد التنفيذ</string>
+    <string name="failures">إخفاقات</string>
+    <string name="journal_livraison">سجل التسليم</string>
+    <string name="missions">المهام</string>
+    <string name="delivered_count">تم التوصيل</string>
+    <string name="activities_today">نشاط اليوم</string>
+    <string name="view_all">عرض الكل</string>
+    <string name="no_deliveries">لا توجد طلبات متاحة</string>
+    
+    <!-- New Delivery -->
+    <string name="add_livraison_title">طلب جديد</string>
+    <string name="select_client">اختر العميل</string>
+    <string name="select_driver">تعيين سائق</string>
+    <string name="amount_to_collect">المبلغ المطلوب (د.ت)</string>
+    <string name="btn_create_delivery">إنشاء الطلب</string>
+    <string name="delivery_created_success">تم إنشاء الطلب بنجاح!</string>
+
+    <!-- Language Selection -->
+    <string name="language_en">EN</string>
+    <string name="language_fr">FR</string>
+    <string name="language_ar">AR</string>
+    <string name="language_selected">تم تحديث اللغة</string>
+    
+    <!-- Status -->
+    <string name="status_delivered">تم التوصيل</string>
+    <string name="status_failed">فشل</string>
+    <string name="status_pending">قيد الانتظار</string>
+    
+    <!-- Welcome Screen -->
+    <string name="welcome_title">مرحباً بكم في LivraisonCom</string>
+    <string name="welcome_subtitle">الخدمات اللوجستية الذكية لعالم أسرع</string>
+</resources>

@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">LivraisonCom</string>
+    
+    <!-- Auth -->
+    <string name="login_title">CONNEXION</string>
+    <string name="register_title">CRÉER UN COMPTE</string>
+    <string name="login_prompt">Veuillez vous connecter pour continuer</string>
+    <string name="register_prompt">Rejoignez notre réseau de livraison</string>
+    <string name="first_name">Prénom</string>
+    <string name="last_name">Nom</string>
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="id_placeholder">Identifiant</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="role_selection">Sélectionnez votre rôle</string>
+    <string name="role_livreur">Livreur</string>
+    <string name="role_controleur">Contrôleur</string>
+    <string name="btn_login">SE CONNECTER</string>
+    <string name="btn_register">S\'INSCRIRE</string>
+    
+    <!-- UI Common -->
+    <string name="settings">Paramètres</string>
+    <string name="logout">Déconnexion</string>
+    <string name="hello">Bonjour, %s</string>
+    <string name="supervision">Supervision</string>
+    <string name="total">Total</string>
+    <string name="analytics">Analytique</string>
+    <string name="performance_driver">Performance par livreur</string>
+    <string name="distribution_flow">Répartition du flux</string>
+    <string name="delivery_list_btn">Liste des livraisons</string>
+    <string name="live_map_btn">Carte en temps réel</string>
+    <string name="in_progress">En cours</string>
+    <string name="failures">Échecs</string>
+    <string name="journal_livraison">Journal Livraison</string>
+    <string name="missions">Missions</string>
+    <string name="delivered_count">Livrées</string>
+    <string name="activities_today">Activités du jour</string>
+    <string name="view_all">VOIR TOUT</string>
+    <string name="no_deliveries">Aucune livraison disponible</string>
+    
+    <!-- New Delivery -->
+    <string name="add_livraison_title">Nouvelle Livraison</string>
+    <string name="select_client">Choisir un Client</string>
+    <string name="select_driver">Assigner un Livreur</string>
+    <string name="amount_to_collect">Montant à encaisser (TND)</string>
+    <string name="btn_create_delivery">CRÉER LA LIVRAISON</string>
+    <string name="delivery_created_success">Livraison créée avec succès !</string>
+
+    <!-- Language Selection -->
+    <string name="language_en">EN</string>
+    <string name="language_fr">FR</string>
+    <string name="language_ar">AR</string>
+    <string name="language_selected">Langue mise à jour</string>
+    
+    <!-- Status -->
+    <string name="status_delivered">Livrée</string>
+    <string name="status_failed">Échec</string>
+    <string name="status_pending">En attente</string>
+    
+    <!-- Welcome Screen -->
+    <string name="welcome_title">Bienvenue sur LivraisonCom</string>
+    <string name="welcome_subtitle">Logistique Intelligente pour un Monde Plus Rapide</string>
+</resources>
