@@ -15,7 +15,7 @@ import com.supervision.livraison.util.SessionManager;
 /**
  * SplashActivity — initial screen with persistent login check.
  */
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
