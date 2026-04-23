@@ -2,10 +2,8 @@ package com.supervision.livraison.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 
 import com.supervision.livraison.R;
 import com.supervision.livraison.activity.controleur.ControleurMainActivity;
@@ -13,7 +11,8 @@ import com.supervision.livraison.activity.livreur.LivreurMainActivity;
 import com.supervision.livraison.util.SessionManager;
 
 /**
- * SplashActivity — initial screen with persistent login check.
+ * SplashActivity modifiée pour débogage. 
+ * Ne redirige plus automatiquement pour identifier la source du crash.
  */
 public class SplashActivity extends BaseActivity {
 
@@ -22,16 +21,20 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            SessionManager sessionManager = new SessionManager(this);
-            
-            if (sessionManager.isLoggedIn()) {
-                redirectToDashboard(sessionManager.getRole());
-            } else {
-                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
-                finish();
-            }
-        }, 2000); // 2 second delay for branding
+        SessionManager sessionManager = new SessionManager(this);
+        Button btnStart = findViewById(R.id.btn_continue_debug);
+
+        if (btnStart != null) {
+            btnStart.setVisibility(View.VISIBLE);
+            btnStart.setOnClickListener(v -> {
+                if (sessionManager.isLoggedIn()) {
+                    redirectToDashboard(sessionManager.getRole());
+                } else {
+                    startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+                    finish();
+                }
+            });
+        }
     }
 
     private void redirectToDashboard(String role) {
