@@ -149,12 +149,44 @@ public class LivreurMainActivity extends BaseActivity {
             public void onResponse(Call<List<Livraison>> call, Response<List<Livraison>> response) {
                 if (response.isSuccessful() && response.body() != null && rvHistory != null) {
                     livraisons = response.body();
-                    // On définit l'adapter ici proprement
+                    rvHistory.setAdapter(new LivraisonAdapter(livraisons));
                 }
             }
             @Override
             public void onFailure(Call<List<Livraison>> call, Throwable t) {}
         });
+    }
+
+    private class LivraisonAdapter extends RecyclerView.Adapter<LivraisonAdapter.ViewHolder> {
+        private List<Livraison> data;
+        LivraisonAdapter(List<Livraison> data) { this.data = data; }
+
+        @Override
+        public ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
+            View v = android.view.LayoutInflater.from(parent.getContext()).inflate(R.layout.item_livraison, parent, false);
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Livraison l = data.get(position);
+            holder.tvClient.setText(l.getClientNom());
+            holder.tvStatus.setText(l.getEtatliv());
+            holder.tvDate.setText(l.getDateliv() != null ? l.getDateliv().toString() : "");
+        }
+
+        @Override
+        public int getItemCount() { return data.size(); }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvClient, tvStatus, tvDate;
+            ViewHolder(View v) {
+                super(v);
+                tvClient = v.findViewById(R.id.tv_client_nom);
+                tvStatus = v.findViewById(R.id.tv_status);
+                tvDate = v.findViewById(R.id.tv_date);
+            }
+        }
     }
 
     private void loadTodayDeliveries() {
@@ -179,8 +211,8 @@ public class LivreurMainActivity extends BaseActivity {
         int pending = 0;
         int delivered = 0;
         for (Livraison l : livraisons) {
-            if ("LIVREE".equalsIgnoreCase(l.getStatut())) delivered++;
-            else if ("EN_COURS".equalsIgnoreCase(l.getStatut())) pending++;
+            if ("LIVREE".equalsIgnoreCase(l.getEtatliv())) delivered++;
+            else if ("EN_COURS".equalsIgnoreCase(l.getEtatliv())) pending++;
         }
         if (tvCountPending != null) tvCountPending.setText(String.valueOf(pending));
         if (tvCountDelivered != null) tvCountDelivered.setText(String.valueOf(delivered));
