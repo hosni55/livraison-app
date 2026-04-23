@@ -38,7 +38,7 @@
         android:text="@string/welcome_subtitle"
         android:textColor="@color/white"
         android:alpha="0.8"
-        app:layout_constraintBottom_toTopOf="@id/loading_progress"
+        app:layout_constraintBottom_toTopOf="@id/btn_continue_debug"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title" />
